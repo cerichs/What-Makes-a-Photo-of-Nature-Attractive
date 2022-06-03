@@ -15,6 +15,8 @@ start_time = datetime.now()
 
 def NewCSV(path, number):
     
+    
+    
     #Læser alle filer i path med navn indeholdende ".csv":
     allfiles = glob.glob(path + "/*.csv")
     
@@ -26,7 +28,6 @@ def NewCSV(path, number):
     
     #Sletter URL NAN-rækker
     data.dropna(subset = ["url_z"], inplace=True)
-    data.sort_values("url_z", inplace=True)
     data.drop_duplicates(subset ="url_z",
                      keep = False, inplace = True)
     data = data.reset_index(drop=True)
@@ -35,20 +36,13 @@ def NewCSV(path, number):
     n = random.sample(range(0, len(data)), number)
     
     #Downloader tilgængelige billeder og gemmer paths
-    photo_path = []
-    idx = []
     for i in n: #skal bare ændres til range(len(data))
         try: ##Ikke alle url er stadig aktiv derfor try/except nødvendig
             url = data['url_z'][i]
             if url.split('/')[-1] in os.listdir(): #undlader duplicates
-                photo_path.append(url.split('/')[-1])
-                idx.append(i)
                 continue
             else:
                 res=wget.download(url)
-                idx.append(i)
-                photo_path.append(res)
-                img_arr = cv2.imread(res)
             
         except: ##hvis url er ugyldig fjerner række fra data
             data = data.drop(index=i)
@@ -69,14 +63,14 @@ def NewCSV(path, number):
                 continue
         except:
             continue
-        
+            
     df = data[data.path != ""]
-    
     df.to_csv("output.csv")
 
 
+
 #eksempelvis nuværende directory og 10 billeder:
-print(NewCSV(os.getcwd(), 10))
+#print(NewCSV(os.getcwd(), 10))
     
 
 end_time = datetime.now()
