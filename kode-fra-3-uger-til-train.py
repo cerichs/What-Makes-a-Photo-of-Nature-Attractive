@@ -21,89 +21,36 @@ np.random.seed(20)
 # Load the data
 
 
-# Normalize the images data
-
-# print('Min: {}, Max: {}'.format(train_images.min(), train_images.max()))
-
-# One-hot encoding of train and test labels
-
-
-# Split train data into train and validation sets
-
-X_train, X_val, y_train, y_val = train_test_split(train_images, train_labels, test_size=0.15, random_state=22)
 
 # Data augmentation
 
-datagen = ImageDataGenerator(rotation_range=8,
-                             zoom_range=[0.95, 1.05],
-                             height_shift_range=0.10,
-                             shear_range=0.15)
+datagen = ImageDataGenerator(validation_split=0.1)
 
-# Define auxillary model
 
-keras.backend.clear_session()
 
-aux_model = keras.Sequential([
-    keras.layers.Conv2D(32, (3, 3), padding='same',
-                        activation='relu',
-                        input_shape=(32, 32, 3)),
-    keras.layers.BatchNormalization(),
-    keras.layers.Conv2D(32, (3, 3), padding='same',
-                        activation='relu'),
-    keras.layers.MaxPooling2D((2, 2)),
-    keras.layers.Dropout(0.3),
+train_generator=datagen.flow_from_dataframe(
+    dataframe=train_df, directory="temp folder direc", 
+    x_col="image_path", y_col="target", has_ext=True, seed = 20,
+    class_mode="raw", target_size=(640,640), batch_size=128, subset = "training")
 
-    keras.layers.Conv2D(64, (3, 3), padding='same',
-                        activation='relu'),
-    keras.layers.BatchNormalization(),
-    keras.layers.Conv2D(64, (3, 3), padding='same',
-                        activation='relu'),
-    keras.layers.MaxPooling2D((2, 2)),
-    keras.layers.Dropout(0.3),
+validation_generator = datagen.flow_from_dataframe(dataframe=train_df, directory="temp folder direc", 
+    x_col="image_path", y_col="target", has_ext=True, seed = 20,
+    class_mode="raw", target_size=(640,640), batch_size=128, subset = "validation")
 
-    keras.layers.Conv2D(128, (3, 3), padding='same',
-                        activation='relu'),
-    keras.layers.BatchNormalization(),
-    keras.layers.Conv2D(128, (3, 3), padding='same',
-                        activation='relu'),
-    keras.layers.MaxPooling2D((2, 2)),
-    keras.layers.Dropout(0.3),
 
-    keras.layers.Flatten(),
-    keras.layers.Dense(128, activation='relu'),
-    keras.layers.Dropout(0.4),
-    keras.layers.Dense(10, activation='softmax')
-])
+test_generator = test_datagen.flow_from_directory(directory="temp folder direc", 
+    seed = 20, class_mode="raw", target_size=(640,640), batch_size=1, shuffle = False)
 
-lr_schedule = keras.callbacks.LearningRateScheduler(
-    lambda epoch: 1e-4 * 10 ** (epoch / 10))
-optimizer = keras.optimizers.Adam(learning_rate=1e-4, amsgrad=True)
-aux_model.compile(optimizer=optimizer,
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
 
-# Fit model in order to determine best learning rate
 
-history = aux_model.fit(datagen.flow(X_train, y_train, batch_size=64),
-                                  epochs=15, validation_data=(X_val, y_val),
-                                  callbacks=[lr_schedule])
-
-# Plot Learning Rate vs. Loss
-
-plt.semilogx(history.history['lr'], history.history['loss'])
-plt.axis([1e-4, 1e-1, 0, 4])
-plt.xlabel('Learning Rate')
-plt.ylabel('Training Loss')
-plt.show()
-
-# Define actual model
+# Define model
 
 keras.backend.clear_session()
 
 model = keras.Sequential([
     keras.layers.Conv2D(32, (3, 3), padding='same',
                         activation='relu',
-                        input_shape=(32, 32, 3)),
+                        input_shape=(640, 640, 3)),
     keras.layers.BatchNormalization(),
     keras.layers.Conv2D(32, (3, 3), padding='same',
                         activation='relu'),
@@ -129,64 +76,49 @@ model = keras.Sequential([
     keras.layers.Flatten(),
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dropout(0.4),
-    keras.layers.Dense(10, activation='softmax')
+    keras.layers.Dense(1)
 ])
 
-early_stopping = keras.callbacks.EarlyStopping(patience=8)
+early_stopping = keras.callbacks.EarlyStopping(patience=8,
+                                               restore_best_weights=True,
+                                               min_delta=.5)
+
 optimizer = keras.optimizers.Adam(lr=1e-3, amsgrad=True)
+
 model_checkpoint = keras.callbacks.ModelCheckpoint(
-    '/kaggle/working/best_cnn.h5',
-    save_best_only=True)
+    'model_cnn.h5',
+    save_best_only=True,
+    save_freq="epoch")
+
 model.compile(optimizer=optimizer,
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
+              loss='mean_squared_error',
+              metrics=['mae','mse'])
 
 model.summary()
 
 # Fit model in order to make predictions
 
-history = model.fit_generator(datagen.flow(X_train, y_train, batch_size=86),
-                              epochs=15, validation_data=(X_val, y_val),
-                              callbacks=[early_stopping, model_checkpoint])
-
-# Evaluate train and validation accuracies and losses
-
-train_acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
-
-train_loss = history.history['loss']
-val_loss = history.history['val_loss']
-
-# Visualize epochs vs. train and validation accuracies and losses
-
-plt.figure(figsize=(20, 10))
-
-plt.subplot(1, 2, 1)
-plt.plot(train_acc, label='Training Accuracy')
-plt.plot(val_acc, label='Validation Accuracy')
-plt.legend()
-plt.title('Epochs vs. Training and Validation Accuracy')
-
-plt.subplot(1, 2, 2)
-plt.plot(train_loss, label='Training Loss')
-plt.plot(val_loss, label='Validation Loss')
-plt.legend()
-plt.title('Epochs vs. Training and Validation Loss')
-
-plt.show()
+history = model.fit_generator(generator=train_generator,
+                                     steps_per_epoch=128,
+                                     validation_data=validation_generator,
+                                     validation_steps=128,
+                                     epochs=100,
+                                     callbacks=[early_stopping,model_checkpoint])
 
 # Evaluate model on test data
-test_loss, test_acc = model.evaluate(x=test_images, y=test_labels, verbose=0)
+test_generator.reset()
+pred = model.evaluate(test_generator,callbacks=callbacks)
 
 print('Test accuracy is: {:0.4f} \nTest loss is: {:0.4f}'.
       format(test_acc, test_loss))
 
+loss=history.history['loss']
+epochs=range(1,len(loss)+1)
+plt.plot(epochs,loss,label='Training loss')
+plt.legend()
+plt.show()
+
 # Get predictions and apply inverse transformation to the labels
-
-y_pred = model.predict(X_train)
-
-y_pred = lb.inverse_transform(y_pred, lb.classes_)
-y_train = lb.inverse_transform(y_train, lb.classes_)
 
 # Plot the confusion matrix
 
