@@ -23,7 +23,6 @@ def NewCSV(path, number):
     dat = []
     for i in allfiles:
         dat.append(pd.read_csv(i, sep=",", encoding='latin-1'))
-    
     data = pd.concat(dat)
     
     #Sletter URL NAN-rækker
@@ -42,7 +41,7 @@ def NewCSV(path, number):
             if url.split('/')[-1] in os.listdir(): #undlader duplicates
                 continue
             else:
-                res=wget.download(url)
+                res=wget.download(url, out = "images")
             
         except: ##hvis url er ugyldig fjerner række fra data
             data = data.drop(index=i)
@@ -57,7 +56,7 @@ def NewCSV(path, number):
     for i in range(len(data)):
         try:
             url = data['url_z'][i]
-            if url.split('/')[-1] in os.listdir():
+            if url.split('/')[-1] in os.listdir("images"):
                 data["path"][i] = f"{os.path.dirname(os.path.abspath(url.split('/')[-1] ))}/{url.split('/')[-1]}"  
             else:
                 continue
@@ -70,7 +69,7 @@ def NewCSV(path, number):
 
 
 #eksempelvis nuværende directory og 10 billeder:
-#print(NewCSV(os.getcwd(), 10))
+print(NewCSV(os.getcwd(), 10))
     
 
 end_time = datetime.now()
