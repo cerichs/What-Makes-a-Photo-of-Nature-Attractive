@@ -10,9 +10,9 @@ from tensorflow import keras
 #import keras
 import seaborn as sns
 from matplotlib import pyplot as plt
-from scipy.io import loadmat
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelBinarizer
+#from scipy.io import loadmat
+#from sklearn.model_selection import train_test_split
+#from sklearn.preprocessing import LabelBinarizer
 from sklearn.metrics import confusion_matrix
 from keras.preprocessing.image import ImageDataGenerator
 
@@ -48,27 +48,27 @@ test_generator = test_datagen.flow_from_directory(directory="temp folder direc",
 keras.backend.clear_session()
 
 model = keras.Sequential([
-    keras.layers.Conv2D(32, (3, 3), padding='same',
+    keras.layers.Conv2D(32, (3, 3),
                         activation='relu',
                         input_shape=(640, 640, 3)),
     keras.layers.BatchNormalization(),
-    keras.layers.Conv2D(32, (3, 3), padding='same',
+    keras.layers.Conv2D(32, (3, 3),
                         activation='relu'),
     keras.layers.MaxPooling2D((2, 2)),
     keras.layers.Dropout(0.3),
 
-    keras.layers.Conv2D(64, (3, 3), padding='same',
+    keras.layers.Conv2D(64, (3, 3),
                         activation='relu'),
     keras.layers.BatchNormalization(),
-    keras.layers.Conv2D(64, (3, 3), padding='same',
+    keras.layers.Conv2D(64, (3, 3),
                         activation='relu'),
     keras.layers.MaxPooling2D((2, 2)),
     keras.layers.Dropout(0.3),
 
-    keras.layers.Conv2D(128, (3, 3), padding='same',
+    keras.layers.Conv2D(128, (3, 3),
                         activation='relu'),
     keras.layers.BatchNormalization(),
-    keras.layers.Conv2D(128, (3, 3), padding='same',
+    keras.layers.Conv2D(128, (3, 3),
                         activation='relu'),
     keras.layers.MaxPooling2D((2, 2)),
     keras.layers.Dropout(0.3),
