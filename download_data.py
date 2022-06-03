@@ -13,7 +13,10 @@ start_time = datetime.now()
 
 #indtager path samt antal af billeder der skal medtages
 
-def NewCSV(path, number):
+def NewCSV(data, trainsize, number):
+
+    
+    
     #Tager n tilfældige billeder fra CSV:
     n = random.sample(range(0, len(data)), number)
     
@@ -45,14 +48,25 @@ def NewCSV(path, number):
                 continue
         except:
             continue
-            
+        
+        
+    
     df = data[data.path != ""]
     df.to_csv("output.csv")
+    
+    boolidx = np.random.rand(len(df)) <= trainsize
+    
+    df_train = df[boolidx]
+    df_test = df[~boolidx]
+    
+    df_train.to_csv("train.csv")
+    df_test.to_csv("test.csv")
+    
 
     
 
 #Læser alle filer i path med navn indeholdende ".csv":
-allfiles = glob.glob(path + "/*.csv")
+allfiles = glob.glob("*.csv")
 
 dat = []
 for i in allfiles:
@@ -68,7 +82,7 @@ data = data.reset_index(drop=True)
 
 
 #eksempelvis nuværende directory og 10 billeder:
-print(NewCSV(os.getcwd(), len(data)))
+print(NewCSV(data, 0.8, 10))
 
 
 end_time = datetime.now()
