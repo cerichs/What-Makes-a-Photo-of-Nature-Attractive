@@ -59,6 +59,9 @@ def NewCSV(data, trainsize, number):
     df_train = df[boolidx]
     df_test = df[~boolidx]
     
+    df_train = df_train[["residfaves", "url_z", "path", "height_z", "width_z"]]
+    df_test = df_test[["residfaves", "url_z", "path", "height_z", "width_z"]]
+    
     df_train.to_csv("train.csv")
     df_test.to_csv("test.csv")
     
@@ -82,7 +85,7 @@ data = data.reset_index(drop=True)
 
 
 #eksempelvis nuværende directory og 10 billeder:
-print(NewCSV(data, 0.8, 10))
+print(NewCSV(data, 0.8, len(data)))
 
 
 end_time = datetime.now()
