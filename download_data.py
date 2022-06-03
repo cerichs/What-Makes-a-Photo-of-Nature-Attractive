@@ -14,23 +14,6 @@ start_time = datetime.now()
 #indtager path samt antal af billeder der skal medtages
 
 def NewCSV(path, number):
-    
-    
-    
-    #Læser alle filer i path med navn indeholdende ".csv":
-    allfiles = glob.glob(path + "/*.csv")
-    
-    dat = []
-    for i in allfiles:
-        dat.append(pd.read_csv(i, sep=",", encoding='latin-1'))
-    data = pd.concat(dat)
-    
-    #Sletter URL NAN-rækker
-    data.dropna(subset = ["url_z"], inplace=True)
-    data.drop_duplicates(subset ="url_z",
-                     keep = False, inplace = True)
-    data = data.reset_index(drop=True)
-    
     #Tager n tilfældige billeder fra CSV:
     n = random.sample(range(0, len(data)), number)
     
@@ -66,11 +49,27 @@ def NewCSV(path, number):
     df = data[data.path != ""]
     df.to_csv("output.csv")
 
+    
+
+#Læser alle filer i path med navn indeholdende ".csv":
+allfiles = glob.glob(path + "/*.csv")
+
+dat = []
+for i in allfiles:
+    dat.append(pd.read_csv(i, sep=",", encoding='latin-1'))
+data = pd.concat(dat)
+
+#Sletter URL NAN-rækker
+data.dropna(subset = ["url_z"], inplace=True)
+data.drop_duplicates(subset ="url_z",
+                 keep = False, inplace = True)
+data = data.reset_index(drop=True)
+
 
 
 #eksempelvis nuværende directory og 10 billeder:
-print(NewCSV(os.getcwd(), 10))
-    
+print(NewCSV(os.getcwd(), len(data)))
+
 
 end_time = datetime.now()
 print('Duration: {}'.format(end_time - start_time))
