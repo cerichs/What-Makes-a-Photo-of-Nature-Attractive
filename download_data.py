@@ -6,6 +6,7 @@ import sys, os
 import glob
 from datetime import datetime
 import random
+from numpy.random import RandomState
 start_time = datetime.now()
 
 
@@ -43,7 +44,7 @@ def NewCSV(data, trainsize, number):
         try:
             url = data['url_z'][i]
             if url.split('/')[-1] in os.listdir("images"):
-                data["path"][i] = f"{os.path.dirname(os.path.abspath(url.split('/')[-1] ))}/{url.split('/')[-1]}"  
+                data["path"][i] = f"{os.path.dirname(os.path.abspath(url.split('/')[-1] ))}/images/{url.split('/')[-1]}"  
             else:
                 continue
         except:
@@ -54,10 +55,10 @@ def NewCSV(data, trainsize, number):
     df = data[data.path != ""]
     df.to_csv("output.csv")
     
-    boolidx = np.random.rand(len(df)) <= trainsize
-    
-    df_train = df[boolidx]
-    df_test = df[~boolidx]
+    rng = RandomState()
+
+    df_train = df.sample(frac=trainsize, random_state=rng)
+    df_test = df.loc[~df.index.isin(df_train.index)]
     
     df_train = df_train[["residfaves", "url_z", "path", "height_z", "width_z"]]
     df_test = df_test[["residfaves", "url_z", "path", "height_z", "width_z"]]
@@ -69,12 +70,7 @@ def NewCSV(data, trainsize, number):
     
 
 #Læser alle filer i path med navn indeholdende ".csv":
-allfiles = glob.glob("*.csv")
-
-dat = []
-for i in allfiles:
-    dat.append(pd.read_csv(i, sep=",", encoding='latin-1'))
-data = pd.concat(dat)
+data = pd.read_csv("Flickr_nature_2020_2022.csv", sep=",", encoding='latin-1')
 
 #Sletter URL NAN-rækker
 data.dropna(subset = ["url_z"], inplace=True)
@@ -85,7 +81,7 @@ data = data.reset_index(drop=True)
 
 
 #eksempelvis nuværende directory og 10 billeder:
-print(NewCSV(data, 0.8, len(data)))
+print(NewCSV(data, 0.8, 10))
 
 
 end_time = datetime.now()
