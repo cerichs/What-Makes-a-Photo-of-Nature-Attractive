@@ -39,9 +39,8 @@ def NewCSV(filename, trainsize, number):
             if url.split('/')[-1] in os.listdir(): #undlader duplicates
                 continue
             else:
+                count+=1
                 res=wget.download(url, out = "images")
-                print("Currently, downloading file: ", i, "out of: ", n, "files")
-            
         except: ##hvis url er ugyldig fjerner række fra data
             data = data.drop(index=i)   
     
@@ -50,7 +49,7 @@ def NewCSV(filename, trainsize, number):
         try:
             url = data['url_z'][i]
             data["path"][i] = f"{os.path.dirname(os.path.abspath(url.split('/')[-1] ))}/images/{url.split('/')[-1]}"  
-            print("Currently, on creating path on file: ", i, "out of: ", len(data), "files")
+            print(f"|{i/len(data)*100}% csv done| Currently, on file:{i} out of:{len(data)}")
         except:
             continue
         
