@@ -14,12 +14,23 @@ start_time = datetime.now()
 
 #indtager path samt antal af billeder der skal medtages
 
-def NewCSV(data, trainsize, number):
+def NewCSV(filename, trainsize, number):
 
+    #Læser fil med angivet filnavn:
+    data = pd.read_csv(filename, sep=",", encoding='latin-1')
+
+    #Sletter URL NAN-rækker
+    data.dropna(subset = ["url_z"], inplace=True)
+    data.drop_duplicates(subset ="url_z",
+                     keep = False, inplace = True)
+    data = data.reset_index(drop=True)
     
     
+    
+        
     #Tager n tilfældige billeder fra CSV:
     n = random.sample(range(0, len(data)), number)
+    
     
     #Downloader tilgængelige billeder og gemmer paths
     for i in n: #skal bare ændres til range(len(data))
@@ -31,8 +42,7 @@ def NewCSV(data, trainsize, number):
                 res=wget.download(url, out = "images")
             
         except: ##hvis url er ugyldig fjerner række fra data
-            data = data.drop(index=i)
-            
+            data = data.drop(index=i)   
     
     #Skaber empty-kolonne som udfyldes iterativt med path til filer
     #data["path"] = ""
@@ -43,13 +53,9 @@ def NewCSV(data, trainsize, number):
     for i in range(len(data)):
         try:
             url = data['url_z'][i]
-            if url.split('/')[-1] in os.listdir("images"):
-                data["path"][i] = f"{os.path.dirname(os.path.abspath(url.split('/')[-1] ))}/images/{url.split('/')[-1]}"  
-            else:
-                continue
+            data["path"][i] = f"{os.path.dirname(os.path.abspath(url.split('/')[-1] ))}/images/{url.split('/')[-1]}"  
         except:
             continue
-        
         
     
     df = data[data.path != ""]
@@ -67,21 +73,11 @@ def NewCSV(data, trainsize, number):
     df_test.to_csv("test.csv")
     
 
-    
-
-#Læser alle filer i path med navn indeholdende ".csv":
-data = pd.read_csv("Flickr_nature_2020_2022.csv", sep=",", encoding='latin-1')
-
-#Sletter URL NAN-rækker
-data.dropna(subset = ["url_z"], inplace=True)
-data.drop_duplicates(subset ="url_z",
-                 keep = False, inplace = True)
-data = data.reset_index(drop=True)
 
 
 
-#eksempelvis nuværende directory og 10 billeder:
-print(NewCSV(data, 0.8, 10))
+#eksempelvis flickr-fil med 80% trainsize og 10 billeder:
+print(NewCSV("Flickr_nature_2020_2022.csv", 0.8, 10))
 
 
 end_time = datetime.now()
