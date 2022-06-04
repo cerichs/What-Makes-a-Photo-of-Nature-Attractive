@@ -40,20 +40,17 @@ def NewCSV(filename, trainsize, number):
                 continue
             else:
                 res=wget.download(url, out = "images")
+                print("Currently, downloading file: ", i, "out of: ", n, "files")
             
         except: ##hvis url er ugyldig fjerner række fra data
             data = data.drop(index=i)   
-    
-    #Skaber empty-kolonne som udfyldes iterativt med path til filer
-    #data["path"] = ""
-    #for i, j in zip(idx, range(len(photo_path))):
-    #    data['path'][i] = photo_path[j]
     
     data["path"] = ""
     for i in range(len(data)):
         try:
             url = data['url_z'][i]
             data["path"][i] = f"{os.path.dirname(os.path.abspath(url.split('/')[-1] ))}/images/{url.split('/')[-1]}"  
+            print("Currently, on creating path on file: ", i, "out of: ", len(data), "files")
         except:
             continue
         
