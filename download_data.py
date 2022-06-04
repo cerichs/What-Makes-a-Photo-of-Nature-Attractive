@@ -60,12 +60,10 @@ def NewCSV(filename, trainsize, number):
     
     rng = RandomState()
 
+    df = df[["residfaves", "url_z", "path", "height_z", "width_z"]]
     df_train = df.sample(frac=trainsize, random_state=rng)
     df_test = df.loc[~df.index.isin(df_train.index)]
-    
-    df_train = df_train[["residfaves", "url_z", "path", "height_z", "width_z"]]
-    df_test = df_test[["residfaves", "url_z", "path", "height_z", "width_z"]]
-    
+
     df_train.to_csv("train.csv")
     df_test.to_csv("test.csv")
     
