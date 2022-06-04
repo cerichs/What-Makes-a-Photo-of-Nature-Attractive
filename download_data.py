@@ -33,13 +33,15 @@ def NewCSV(filename, trainsize, number):
     
     
     #Downloader tilgængelige billeder og gemmer paths
+    count = 0
     for i in n: #skal bare ændres til range(len(data))
+        count +=1
+        print(f"|{count/number*100}% download done| Currently, on file:{count} out of:{number}")
         try: ##Ikke alle url er stadig aktiv derfor try/except nødvendig
             url = data['url_z'][i]
             if url.split('/')[-1] in os.listdir(): #undlader duplicates
                 continue
             else:
-                count+=1
                 res=wget.download(url, out = "images")
         except: ##hvis url er ugyldig fjerner række fra data
             data = data.drop(index=i)   
@@ -51,8 +53,7 @@ def NewCSV(filename, trainsize, number):
             data["path"][i] = f"{os.path.dirname(os.path.abspath(url.split('/')[-1] ))}/images/{url.split('/')[-1]}"  
             print(f"|{i/len(data)*100}% csv done| Currently, on file:{i} out of:{len(data)}")
         except:
-            continue
-        
+            continue 
     
     df = data[data.path != ""]
     df.to_csv("output.csv")
