@@ -61,7 +61,7 @@ def NewCSV(filename, trainsize, number):
     df = data[data.path != ""]
     df.to_csv("output.csv")
     
-    rng = RandomState()
+    rng = RandomState(seed=20)
 
     df = df[["residfaves", "url_z", "path", "height_z", "width_z"]]
     df_train = df.sample(frac=trainsize, random_state=rng)
