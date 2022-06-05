@@ -16,8 +16,11 @@ start_time = datetime.now()
 
 def NewCSV(filename, trainsize, number):
 
+    try:
     #Læser fil med angivet filnavn:
-    data = pd.read_csv(filename, sep=",", encoding='latin-1')
+        data = pd.read_csv(filename, sep=",", encoding='latin-1')
+    except:
+        data = pd.read_pickle(filename)
 
     #Sletter URL NAN-rækker
     data.dropna(subset = ["url_z"], inplace=True)
@@ -27,24 +30,24 @@ def NewCSV(filename, trainsize, number):
     
     
     
-        
+    """    
     #Tager n tilfældige billeder fra CSV:
     n = random.sample(range(0, len(data)), number)
     
+    pathout = f"{os.getcwd()}/images"
     
     #Downloader tilgængelige billeder og gemmer paths
-    count = 0
     for i in n: #skal bare ændres til range(len(data))
-        count +=1
-        print(f"|{count/number*100}% download done| Currently, on file:{count} out of:{number}")
+        print(f"|{(len(os.listdir(pathout)))/number*100}% download done| Currently, on file:{(len(os.listdir(pathout)))} out of:{number}")
         try: ##Ikke alle url er stadig aktiv derfor try/except nødvendig
             url = data['url_z'][i]
             if url.split('/')[-1] in os.listdir(): #undlader duplicates
                 continue
             else:
-                res=wget.download(url, out = "images")
+                res=wget.download(url, out = pathout)
         except: ##hvis url er ugyldig fjerner række fra data
             data = data.drop(index=i)   
+    """
     
     data["path"] = ""
     for i in range(len(data)):
@@ -72,8 +75,9 @@ def NewCSV(filename, trainsize, number):
 
 
 #eksempelvis flickr-fil med 80% trainsize og 10 billeder:
-print(NewCSV("Flickr_nature_2020_2022.csv", 0.8, 10))
-
+#print(NewCSV("Flickr_nature_2020_2022.csv", 0.8, 179050))
+#number=179050
+print(NewCSV("dataframesaved.pkl", 0.8, 179050))
 
 end_time = datetime.now()
 print('Duration: {}'.format(end_time - start_time))
