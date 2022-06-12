@@ -54,6 +54,8 @@ def Kmeans(test_data, K):
     
     data["avg_dist"] = ""
     for i in img:
+        print(f"|{i/len(img)*100}% K-means done| Currently, on file:{i} out of:{len(img)}")
+        
         #Laver K-means på antallet af clusters
         kmeans=KMeans(n_clusters=K, random_state = 1)
         #Fitter K-means på billedet
