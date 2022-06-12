@@ -33,6 +33,7 @@ def Kmeans(test_data, K):
     img = []
     for path in data["Image path"]:
         try:
+            print(f"|{path/len(data["Image path"])*100}% images done| Currently, on file:{path} out of:{len(data["Image path"])}")
             #Indlæser billeder
             img1=cv2.imread(path)
             #Indlæser med RGB
