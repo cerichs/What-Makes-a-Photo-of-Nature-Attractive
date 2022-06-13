@@ -10,6 +10,8 @@ import os
 import seaborn as sns
 from sklearn.metrics import mean_squared_error
 import scipy
+from sklearn.linear_model import LinearRegression
+import matplotlib.image as mpimg
 
 #from download_data import *
 
@@ -31,9 +33,11 @@ def Kmeans(test_data, K):
     """
     
     img = []
+    count = 0
     for path in data["Image path"]:
+        count +=1
         try:
-            print(f"|{path/len(data["Image path"])*100}% images done| Currently, on file:{path} out of:{len(data["Image path"])}")
+            print(f"|{path/len(data)*100}% images done| Currently, on file:{path} out of:{len(data)}")
             #Indlæser billeder
             img1=cv2.imread(path)
             #Indlæser med RGB
@@ -54,8 +58,10 @@ def Kmeans(test_data, K):
     min_dist=[]
     
     data["avg_dist"] = ""
+    count = 0
     for i in img:
-        print(f"|{i/len(img)*100}% K-means done| Currently, on file:{i} out of:{len(img)}")
+        count +=1
+        print(f"|{count/len(data)*100}% K-means done| Currently, on file:{count} out of:{len(data)}")
         
         #Laver K-means på antallet af clusters
         kmeans=KMeans(n_clusters=K, random_state = 1)
@@ -94,7 +100,7 @@ def Kmeans(test_data, K):
         #Tager gennemsnitlig distance af antal clusters
         tri_dists = dists[np.triu_indices(K, 1)]
         
-        data["avg_dist"] = tri_dists.mean()
+        data["avg_dist"][i] = tri_dists.mean()
         
         max_dist.append(tri_dists.max())
         avg_dist.append(tri_dists.mean())
@@ -117,13 +123,13 @@ def Kmeans(test_data, K):
     ax = sns.scatterplot(data=data, x="avg_dist", y="Predicted Resid",
                          color="black", alpha=0.5)
     ax.plot(x, target_predicted)
-    _ = ax.set_title(f"Mean squared error = {mse:.2f},  R-squared: {res.rvalue**2:.6f} ")
+    _ = ax.set_title(f"Mean squared error = {mse:.2f},  R-squared: {r_value**2:.6f} ")
     
     
     return max_dist, avg_dist, min_dist
 
 
-print(Kmeans("predicted_df.pkl", 5))
+print(Kmeans("ny.pkl", 5))
 
 
 
@@ -141,4 +147,56 @@ print(md)
 plt.plot(list(np.arange(1,21)),md)
 plt.show()
 """
+def plot_kmeans(path):
+    
+    img1=cv2.imread(path)
+    #Indlæser med RGB
+    imgo=cv2.cvtColor(img1,cv2.COLOR_BGR2RGB)
+    #(h,w,c) = imgo.shape
+    #plt.subplot(1, 2, 1)
+    #plt.axis("off")
+    #plt.imshow(imgo)
+
+    #Vektorisere
+    img = imgo.reshape((imgo.shape[1]*imgo.shape[0],3))
+    
+    kmeans=KMeans(n_clusters=5, random_state = 1)
+    #Fitter K-means på billedet
+    s=kmeans.fit(img)
+
+    #Angiver antal labels på antal clusters
+    labels=kmeans.labels_
+    labels=list(labels)
+
+    #Finder centrum af farver
+    centroid=kmeans.cluster_centers_
+    rgb_cols = kmeans.cluster_centers_.round(0).astype(int)
+    
+    percent=[]
+    for c in range(len(centroid)):
+      j=labels.count(c)
+      j=j/(len(labels))
+      percent.append(j)
+      
+      
+    
+    plt.subplot(1, 2, 1)
+    img = mpimg.imread(path)
+    plt.axis("off")
+    plt.imshow(img)
+
+
+    plt.subplot(1, 2, 2)
+    plt.bar(np.arange(len(centroid)), percent, color=centroid/255, edgecolor = 'black')
+    plt.xlabel("Colors")
+    plt.ylabel("Percentage color")
+
+
+    plt.show()
+
+print(plot_kmeans("/Users/Yohan/Downloads/02466Fagprojekt-main/images/49693844557_224103a114_z.jpg"))
+
+
+
+
 
