@@ -4,6 +4,7 @@ import numpy as np
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy import stats
 
 data = pd.read_pickle("/Users/Yohan/Downloads/02466Fagprojekt-main/eksempel.pkl")
 
@@ -50,13 +51,26 @@ for i in av_col:
     blue_percentage.append(i[2]/np.sum(i))
     
     
+correlationr,p_valuer=stats.pearsonr(av_col[0].tolist(),data["Predicted Resid"].tolist())
+correlationg,p_valuer=stats.pearsonr(av_col[1].tolist(),data["Predicted Resid"].tolist())
+correlationb,p_valuer=stats.pearsonr(av_col[2].tolist(),data["Predicted Resid"].tolist())
+
 
 
 plt.scatter(red_percentage, data["Predicted Resid"], color="red")
+plt.xlabel("Red percentage")
+plt.ylabel("Predicted Resid")
+plt.title(f"Color density, corr={correlationr}")
 plt.show()
 plt.scatter(green_percentage, data["Predicted Resid"], color="green")
+plt.xlabel("Green percentage")
+plt.ylabel("Predicted Resid")
+plt.title(f"Color density, corr={correlationg}")
 plt.show()
 plt.scatter(blue_percentage, data["Predicted Resid"], color="blue")
+plt.xlabel("Blue percentage")
+plt.ylabel("Predicted Resid")
+plt.title(f"Color density, corr={correlationb}")
 plt.show()
 
 
