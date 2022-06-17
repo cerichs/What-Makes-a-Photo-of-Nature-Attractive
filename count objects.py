@@ -33,6 +33,11 @@ for path in data["Image path"]:
 data['objects'].replace('', np.nan, inplace=True)
 data.dropna(subset=['objects'], inplace=True)
 
+
+#Gemmer ny pickle med object-count
+data.to_pickle("predicted_df.pkl")
+
+
 plt.scatter(data["objects"],data["Predicted Resid"],color="black", alpha=1,s=.2,marker="o")
 correlation,p_value=stats.pearsonr(data["objects"].tolist(),data["Predicted Resid"].tolist())
 plt.title(f"Predicted Residfaves and counted object, corr= {correlation:.2f}")
@@ -46,3 +51,4 @@ plt.xlabel("Counted Objects")
 plt.savefig('count_object_hist.png',
             dpi=200)
 plt.show()
+
