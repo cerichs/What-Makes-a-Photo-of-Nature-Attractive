@@ -13,6 +13,7 @@ import scipy
 from sklearn.linear_model import LinearRegression
 from PIL import Image
 from scipy import stats
+from collections import Counter, defaultdict
 
 #from download_data import *
 
@@ -57,6 +58,8 @@ avg_dist=[]
 min_dist=[]
 
 data["avg_dist"] = ""
+data["meancells"] = ""
+
 count=0
 for path in data["Image path"]:
     try:
@@ -79,6 +82,10 @@ for path in data["Image path"]:
         
         #Angiver antal labels på antal clusters
         labels=kmeans.labels_
+        
+        countcells = Counter(estimator.labels_)
+        meancells = sum(countcells.values()) / len(countcells)
+        
         labels=list(labels)
         
         #Finder centrum af farver
@@ -108,21 +115,32 @@ for path in data["Image path"]:
         dists = euclidean_distances(kmeans.cluster_centers_)
         #Tager gennemsnitlig distance af antal clusters
         tri_dists = dists[np.triu_indices(K, 1)]
-        
-        data.iloc[count-1,3]=tri_dists.mean()
+
         #data["avg_dist"] = tri_dists.mean()
         
         max_dist.append(tri_dists.max())
         avg_dist.append(tri_dists.mean())
         min_dist.append(tri_dists.min())
+        
+        data["objects"].iloc[count-1]=avg_dist
+        data["meancells"].iloc[count-1]=meancells
+        
     except:
         pass
 
 
-
-data = pd.read_pickle("kmeans_df.pkl")
 data['avg_dist'].replace('', np.nan, inplace=True)
 data.dropna(subset=['avg_dist'], inplace=True)
+
+data['meancells'].replace('', np.nan, inplace=True)
+data.dropna(subset=['meancells'], inplace=True)
+
+
+#Gemmer ny pickle med object-coun
+data.to_pickle("predicted_df.pkl")
+
+
+data = pd.read_pickle("kmeans_df.pkl")
 
 
 x=data["avg_dist"]

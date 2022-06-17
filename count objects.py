@@ -25,7 +25,7 @@ for path in data["Image path"]:
         (cnt, hierarchy) = cv2.findContours(
             canny.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         
-        data.iloc[count-1,3]=len(cnt)
+        data["objects"].iloc[count-1]=len(cnt)
     except:
         pass
 
@@ -36,6 +36,9 @@ data.dropna(subset=['objects'], inplace=True)
 
 #Gemmer ny pickle med object-count
 data.to_pickle("predicted_df.pkl")
+
+
+
 
 
 plt.scatter(data["objects"],data["Predicted Resid"],color="black", alpha=1,s=.2,marker="o")

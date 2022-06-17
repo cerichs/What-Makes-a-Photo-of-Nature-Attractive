@@ -25,7 +25,7 @@ for path in data["Image path"]:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         entropy=skimage.measure.shannon_entropy(img)
 
-        data.iloc[count-1,3]=entropy
+        data["entropy"].iloc[count-1]=entropy
 
     except:
         pass
