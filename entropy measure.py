@@ -33,6 +33,14 @@ for path in data["Image path"]:
 
 data['entropy'].replace('', np.nan, inplace=True)
 data.dropna(subset=['entropy'], inplace=True)
+
+
+#Gemmer ny pickle med object-coun
+data.to_pickle("predicted_df.pkl")
+
+
+
+
 correlation,p_value=stats.pearsonr(data["entropy"].tolist(),data["Predicted Resid"].tolist())
 plt.scatter(data["entropy"],data["Predicted Resid"],color="black", alpha=1,s=.2,marker="o")
 plt.title(f"Predicted Residfaves and shannon entropy, corr= {correlation:.2f}")
@@ -41,8 +49,6 @@ plt.ylabel("Predicted Residfaves")
 plt.savefig('entropy_predicted_resid.png',
             dpi=200)
 plt.show()
-
-
 
 
 plt.scatter(data["Predicted Resid"],data["True Resid"],color="black", alpha=1,s=.2,marker="o")
