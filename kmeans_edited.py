@@ -122,7 +122,7 @@ for path in data["Image path"]:
         avg_dist.append(tri_dists.mean())
         min_dist.append(tri_dists.min())
         
-        data["objects"].iloc[count-1]=avg_dist
+        data["avg_dist"].iloc[count-1]=avg_dist
         data["meancells"].iloc[count-1]=meancells
         
     except:
@@ -138,6 +138,9 @@ data.dropna(subset=['meancells'], inplace=True)
 
 #Gemmer ny pickle med object-coun
 data.to_pickle("predicted_df.pkl")
+
+
+
 
 
 data = pd.read_pickle("kmeans_df.pkl")
