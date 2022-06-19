@@ -83,7 +83,7 @@ for path in data["Image path"]:
         #Angiver antal labels på antal clusters
         labels=kmeans.labels_
         
-        countcells = Counter(estimator.labels_)
+        countcells = Counter(kmeans.labels_)
         meancells = sum(countcells.values()) / len(countcells)
         
         labels=list(labels)

@@ -20,8 +20,8 @@ for i in range(len(data)):
 av_col = []
 
 
-temp_df=pd.DataFrame()
-temp_df["Predicted Resid"]=data["Predicted Resid"]
+#temp_df=pd.DataFrame()
+#temp_df["Predicted Resid"]=data["Predicted Resid"]
 
 
 
@@ -43,7 +43,7 @@ for i in data["Image path"]:
         data["average color green"].iloc[count-1]=average_color[1]
         data["average color blue"].iloc[count-1]=average_color[2]
         data["average color total"].iloc[count-1]=np.sum(average_color)
-
+        print(count)
         """
         d_img = np.ones((312,312,3), dtype=np.uint8)
         d_img[:,:] = average_color
@@ -70,15 +70,15 @@ data.dropna(subset=['average color total'], inplace=True)
 
 
 
-#Gemmer ny pickle med object-coun
-data.to_pickle("predicted_df.pkl")
 
     
-temp_df['average color red']=temp_df['average color red']/temp_df['average color total']
-temp_df['average color green']=temp_df['average color green']/temp_df['average color total']
-temp_df['average color blue']=temp_df['average color blue']/temp_df['average color total']
+data['average color red']=data['average color red']/data['average color total']
+data['average color green']=data['average color green']/data['average color total']
+data['average color blue']=data['average color blue']/data['average color total']
 
 
+#Gemmer ny pickle med object-coun
+data.to_pickle("predicted_df.pkl")
 
     
 correlationr,p_valuer=stats.pearsonr(temp_df['average color red'],temp_df["Predicted Resid"].tolist())
