@@ -10,6 +10,7 @@ from sklearn.metrics import r2_score
 
 
 temp_df=pd.read_pickle("predict_df_to_pca.pkl")
+
 sns.set_theme(color_codes=True)
 temp_df['average color red'] = pd.to_numeric(temp_df['average color red'])
 temp_df['average color blue'] = pd.to_numeric(temp_df['average color blue'])
@@ -20,48 +21,35 @@ temp_df['objects'] = pd.to_numeric(temp_df['objects'])
 temp_df['avg_dist'] = pd.to_numeric(temp_df['avg_dist'])
 
 
-classes=["very unacctractive","unattractive", "neutral", "attractive"]
-Q=[-5.43106544, -0.48404679,  0.09200823,  0.57377643,  2.62637219]
-temp=[]
-j=0
-for entries in data["Predicted Resid"]:
-    for i in range(0,4,1):
-        if (Q[i] < entries < Q[i+1]):
-            temp.append(classes[i])
-        else:
-            pass
-    if j%500==0:
-        print(j)
-    j=j+1
-data["class"]=temp
+###Correlation heat map
+corr = temp_df.corr()
+f, ax = plt.subplots(figsize=(10,10))
+cmap = sns.diverging_palette(220, 10, as_cmap=True)
+heatmap = sns.heatmap(corr, cmap=cmap, center=0.0, vmax=1, linewidth=1, ax=ax)
+plt.show()
 
 
-x=data[["entropy","objects","average color red","average color green","average color blue", "average color total", "avg_dist"]]
-y=data["class"]
-x = StandardScaler().fit_transform(x)
-pca = PCA(n_components=7)
+x=temp_df[["entropy","objects","average color red","average color green","average color blue", "average color total", "avg_dist"]]
+y=temp_df["Predicted Resid"]
+scaler = StandardScaler()
+scaler.fit(x)
+x=scaler.transform(x)
+pca = PCA()
 pc = pca.fit_transform(x)
 pc_df = pd.DataFrame(data = pc, columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7'])
-finalDf = pd.concat([pc_df], axis = 1)
+finalDf = pd.concat([pc_df, temp_df["Predicted Resid"]], axis = 1)
+finalDf.dropna(subset = ["PC1"], inplace=True)
 
 
 fig = plt.figure(figsize = (8,6), dpi=250)
-ax = fig.add_subplot(1,1,1) 
-ax.set_xlabel('Principal Component 1', fontsize = 15)
-ax.set_ylabel('Principal Component 2', fontsize = 15)
-ax.set_title('2 component PCA', fontsize = 20)
-
-colors = []
-for i,j,k, t in zip(data["average color red"],data["average color green"],data["average color blue"], data["average color total"]):
-    c = [i*t,j*t,k*t]
-    colors.append(c)
-
-
-
-ax.scatter(finalDf.loc[:, 'PC1'], finalDf.loc[:, 'PC2'], c = np.array(colors)/255.0, s = .8, alpha=.5)
-#ax.legend(classes)
-ax.grid()
+plt.scatter(pc[:,0], pc[:,1], c = finalDf["Predicted Resid"], cmap="hsv", s = .8, alpha=.5)
+plt.xlabel('Principal Component 1', fontsize = 15)
+plt.ylabel('Principal Component 2', fontsize = 15)
+plt.title('2 component PCA', fontsize = 20)
+plt.colorbar()
+plt.grid(visible=1, axis="both")
 plt.show()
+
 
 cum_sum_exp = np.cumsum(pca.explained_variance_ratio_)
 plt.bar(range(0,len(pca.explained_variance_ratio_)), pca.explained_variance_ratio_, alpha=0.5, align='center', label='Individual explained variance')
@@ -70,6 +58,29 @@ plt.ylabel('Explained variance ratio')
 plt.xlabel('Principal component index')
 plt.legend(loc='best')
 plt.tight_layout()
+plt.show()
+
+df = temp_df.loc[:, ["entropy","objects","average color red","average color green","average color blue", "average color total", "avg_dist"]]
+
+def myplot(score,coeff,labels=None):
+    xs = score[:,0]
+    ys = score[:,1]
+    n = coeff.shape[0]
+    scalex = xs
+    scaley = ys
+    plt.scatter(xs ,ys, c = y)
+    for i in range(n):
+        plt.arrow(0, 0, coeff[i,0], coeff[i,1],color = 'r',alpha = 0.5)
+        if labels is None:
+            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, ["entropy","objects","average color red","average color green","average color blue", "average color total", "avg_dist"][i],  color = 'g', ha = 'center', va = 'center')
+        else:
+            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, labels[i], color = 'g', ha = 'center', va = 'center')
+    plt.xlabel("PC{}".format(1))
+    plt.ylabel("PC{}".format(2))
+    plt.grid()
+
+#Call the function. Use only the 2 PCs.
+myplot(pc[:,0:2],np.transpose(pca.components_[0:2, :]))
 plt.show()
 
 
